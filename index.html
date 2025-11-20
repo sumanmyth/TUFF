@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE TUFF GANG | SYSTEM OVERRIDE</title>
+
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <!-- Config & Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#00ffcc', 
+                        'secondary': '#bc13fe', 
+                        'gold': '#ffd700', 
+                        'dark': '#050505',
+                    },
+                    fontFamily: {
+                        heading: ['Orbitron', 'sans-serif'],
+                        body: ['Rajdhani', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- CORE SETUP --- */
+        body {
+            background-color: #000;
+            overflow-x: hidden; /* Prevents horizontal scroll on mobile */
+            cursor: crosshair;
+        }
+
+        /* --- MATRIX BACKGROUND --- */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.25;
+        }
+
+        /* --- CRT SCANLINES OVERLAY --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        /* --- HOLOGRAPHIC CARDS --- */
+        .holo-card {
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 204, 0.2);
+            transition: all 0.4s ease;
+        }
+        .holo-card:hover {
+            background: rgba(10, 10, 10, 0.9);
+            border-color: #00ffcc;
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
+        }
+
+        /* --- SCROLL ANIMATION CLASS --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- GLITCH EFFECT --- */
+        .glitch-text {
+            position: relative;
+        }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -1px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(12px, 9999px, 52px, 0); }
+            5% { clip: rect(34px, 9999px, 11px, 0); }
+            100% { clip: rect(1px, 9999px, 76px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(2px, 9999px, 82px, 0); }
+            5% { clip: rect(54px, 9999px, 11px, 0); }
+            100% { clip: rect(21px, 9999px, 96px, 0); }
+        }
+
+        /* --- MEMBER IMAGES --- */
+        .cyber-img {
+            filter: grayscale(100%) contrast(1.2) brightness(0.8);
+            transition: 0.5s;
+        }
+        .holo-card:hover .cyber-img {
+            filter: grayscale(0%) contrast(1) brightness(1);
+        }
+    </style>
+</head>
+<body class="text-gray-300 font-body antialiased selection:bg-primary selection:text-black">
+
+    <!-- CANVAS FOR MATRIX RAIN -->
+    <canvas id="matrix-bg"></canvas>
+
+    <!-- CRT OVERLAY -->
+    <div class="scanlines"></div>
+
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-primary/20">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="#" class="font-heading text-xl text-primary font-bold tracking-widest hover:text-white transition shadow-primary drop-shadow-lg">
+                TUFF<span class="text-white text-[10px] align-top opacity-50">_SYS</span>
+            </a>
+            <!-- Simplified Nav for Mobile -->
+            <div class="flex space-x-4 text-[10px] sm:text-xs font-mono tracking-wider text-gray-400">
+                <a href="#members" class="hover:text-primary transition-all">OPERATIVES</a>
+                <a href="#hierarchy" class="hover:text-primary transition-all">LEVELS</a>
+                <a href="#token" class="hover:text-primary transition-all">$TOKEN</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="min-h-screen flex flex-col justify-center items-center text-center px-4 relative overflow-hidden pt-16">
+        <!-- Decorative background circle -->
+        <div class="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] bg-primary/10 rounded-full blur-[80px] -z-10 animate-pulse-fast"></div>
+
+        <div class="container mx-auto z-10 max-w-4xl">
+            <div class="mb-6 inline-block px-3 py-1 border border-primary/50 rounded bg-primary/10 text-primary font-mono text-[10px] md:text-xs tracking-widest">
+                STATUS: UNBREAKABLE
+            </div>
+            <!-- Optimized Typography for Mobile -->
+            <h1 class="font-heading text-5xl sm:text-6xl md:text-8xl lg:text-9xl leading-none mb-6 text-white glitch-text tracking-tighter sm:tracking-normal" data-text="THE TUFF GANG">
+                THE TUFF GANG
+            </h1>
+            <p class="text-lg md:text-2xl text-gray-400 font-mono h-12 md:h-8 px-4">
+                <span id="typewriter" class="text-primary"></span><span class="animate-pulse">_</span>
+            </p>
+            
+            <a href="#members" class="mt-8 md:mt-10 group relative inline-flex items-center justify-center px-8 py-3 text-sm md:text-base font-bold text-white transition-all duration-200 bg-transparent border-2 border-primary hover:bg-primary hover:text-black focus:outline-none">
+                <span class="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-gray-900"></span>
+                <span class="relative">INITIATE SEQUENCE</span>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- PROTOCOLS (ATTRIBUTES) -->
+        <section id="protocols" class="py-16 md:py-24 container mx-auto px-4">
+            <h2 class="reveal font-heading text-3xl md:text-4xl text-center mb-12 break-words">
+                <span class="text-primary">//</span> CORE_PROTOCOLS
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                
+                <!-- Protocol 01 -->
+                <div class="reveal holo-card p-5 rounded-xl group">
+                    <div class="text-4xl mb-3 font-mono text-primary/50 font-bold group-hover:text-primary group-hover:opacity-100 transition">01</div>
+                    <h3 class="text-white font-heading text-lg mb-2 text-primary">Zero Crumble</h3>
+                    <p class="text-sm font-mono text-gray-400 leading-relaxed">Physics engine override. Structural integrity locked at infinity.</p>
+                </div>
+                
+                <!-- Protocol 02 -->
+                <div class="reveal holo-card p-5 rounded-xl group">
+                    <div class="text-4xl mb-3 font-mono text-primary/50 font-bold group-hover:text-primary group-hover:opacity-100 transition">02</div>
+                    <h3 class="text-white font-heading text-lg mb-2 text-primary">Boss Music</h3>
+                    <p class="text-sm font-mono text-gray-400 leading-relaxed">Proximity sensor triggers 'Dark Souls' final boss soundtrack.</p>
+                </div>
+
+                <!-- Protocol 03 -->
+                <div class="reveal holo-card p-5 rounded-xl group">
+                    <div class="text-4xl mb-3 font-mono text-primary/50 font-bold group-hover:text-primary group-hover:opacity-100 transition">03</div>
+                    <h3 class="text-white font-heading text-lg mb-2 text-primary">Mind Fortress</h3>
+                    <p class="text-sm font-mono text-gray-400 leading-relaxed">Mental firewall active. 0% penetration from drama packets.</p>
+                </div>
+
+                <!-- Protocol 04 -->
+                <div class="reveal holo-card p-5 rounded-xl group">
+                    <div class="text-4xl mb-3 font-mono text-primary/50 font-bold group-hover:text-primary group-hover:opacity-100 transition">04</div>
+                    <h3 class="text-white font-heading text-lg mb-2 text-primary">0ms Latency</h3>
+                    <p class="text-sm font-mono text-gray-400 leading-relaxed">Real-time responses. We move before the server updates.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROS & CONS -->
+        <section class="py-16 md:py-24 container mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                
+                <!-- PROS -->
+                <div class="reveal holo-card p-6 md:p-8 border-l-4 border-l-primary">
+                    <h2 class="text-xl md:text-2xl font-heading text-primary mb-6 flex items-center">
+                        <span class="animate-pulse mr-2">●</span> SYSTEM_ADVANTAGES
+                    </h2>
+                    <ul class="space-y-4 font-mono text-sm md:text-base">
+                        <li class="flex items-center"><span class="text-primary mr-3">[+]</span> Roast Proof (Thermal Shielding)</li>
+                        <li class="flex items-center"><span class="text-primary mr-3">[+]</span> Plot Armor Thickness: MAX</li>
+                        <li class="flex items-center"><span class="text-primary mr-3">[+]</span> Emotional Damage: NULL</li>
+                        <li class="flex items-center"><span class="text-primary mr-3">[+]</span> Main Character Energy</li>
+                    </ul>
+                </div>
+                
+                <!-- CONS (GLITCHED) -->
+                <div class="reveal holo-card p-6 md:p-8 border-l-4 border-l-red-500 relative overflow-hidden min-h-[300px]">
+                    <h2 class="text-xl md:text-2xl font-heading text-red-500 mb-6 opacity-20">SYSTEM_FLAWS</h2>
+                    
+                    <!-- Glitch Overlay -->
+                    <div class="absolute inset-0 bg-black/90 z-10 flex flex-col justify-center items-center text-center p-4">
+                        <div class="text-5xl md:text-6xl mb-4">⚠️</div>
+                        <div class="border-2 border-red-500 text-red-500 font-heading text-2xl md:text-3xl px-4 py-2 rotate-[-5deg] mb-4 animate-pulse">
+                            FATAL ERROR 404
+                        </div>
+                        <p class="text-red-400 font-mono text-xs md:text-sm">
+                            SEARCHING FOR WEAKNESS...<br>
+                            <span class="text-white">0 FILES FOUND.</span><br>
+                            TUFFNESS CANNOT BE NERFED.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MEMBERS (OPERATIVES) -->
+        <section id="members" class="py-16 md:py-24 container mx-auto px-4">
+            <h2 class="reveal font-heading text-3xl md:text-4xl text-center mb-12">
+                ACTIVE <span class="text-primary neon-text">OPERATIVES</span>
+            </h2>
+            
+            <!-- Centered Wrapper for Cards -->
+            <div class="flex flex-wrap justify-center gap-8 md:gap-10">
+                
+                <!-- MEMBER 1: Nishant -->
+                <div class="reveal holo-card w-full max-w-[340px] rounded-xl overflow-hidden group mx-auto">
+                    <div class="relative h-72 md:h-96 overflow-hidden border-b border-primary/30">
+                        <div class="absolute w-full h-1 bg-primary/50 z-20 animate-[scan_2s_linear_infinite] opacity-0 group-hover:opacity-100"></div>
+                        <img src="nishant.jpg" alt="Nishant" class="cyber-img w-full h-full object-cover">
+                    </div>
+                    <div class="p-5 md:p-6 relative">
+                        <div class="absolute top-0 right-0 p-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <h2 class="text-2xl font-heading text-white mb-1">Nishant U.</h2>
+                        <span class="text-primary font-mono text-xs tracking-[0.2em] block mb-4">CODENAME: MILK-MAN</span>
+                        
+                        <p class="text-xs text-gray-400 font-mono mt-3 border-t border-gray-700 pt-3 leading-relaxed">
+                            <span class="text-primary font-bold">> STATUS:</span><br>
+                            Awarded for excessive Tuffness.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- MEMBER 2: Suman -->
+                <div class="reveal holo-card w-full max-w-[340px] rounded-xl overflow-hidden group mx-auto">
+                    <div class="relative h-72 md:h-96 overflow-hidden border-b border-primary/30">
+                        <div class="absolute w-full h-1 bg-primary/50 z-20 animate-[scan_2s_linear_infinite] opacity-0 group-hover:opacity-100"></div>
+                        <img src="suman.jpg" alt="Suman" class="cyber-img w-full h-full object-cover">
+                    </div>
+                    <div class="p-5 md:p-6 relative">
+                        <div class="absolute top-0 right-0 p-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <h2 class="text-2xl font-heading text-white mb-1">Suman P.</h2>
+                        <span class="text-primary font-mono text-xs tracking-[0.2em] block mb-4">CODENAME: SU-MAN</span>
+                        
+                        <p class="text-xs text-gray-400 font-mono mt-3 border-t border-gray-700 pt-3 leading-relaxed">
+                            <span class="text-primary font-bold">> STATUS:</span><br>
+                            Admin of the Simulation.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- MEMBER 3: Adhish -->
+                <div class="reveal holo-card w-full max-w-[340px] rounded-xl overflow-hidden group mx-auto">
+                    <div class="relative h-72 md:h-96 overflow-hidden border-b border-primary/30">
+                        <div class="absolute w-full h-1 bg-primary/50 z-20 animate-[scan_2s_linear_infinite] opacity-0 group-hover:opacity-100"></div>
+                        <img src="adhish.jpg" alt="Adhish" class="cyber-img w-full h-full object-cover">
+                    </div>
+                    <div class="p-5 md:p-6 relative">
+                        <div class="absolute top-0 right-0 p-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                        <h2 class="text-2xl font-heading text-white mb-1">Adhish A.</h2>
+                        <span class="text-primary font-mono text-xs tracking-[0.2em] block mb-4">CODENAME: A-MAN</span>
+                        
+                        <p class="text-xs text-gray-400 font-mono mt-3 border-t border-gray-700 pt-3 leading-relaxed">
+                            <span class="text-primary font-bold">> STATUS:</span><br>
+                            Certified Tuff since Day 1.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- HIERARCHY / TIMELINE SECTION (NEW & MODERNIZED) -->
+        <section id="hierarchy" class="py-16 md:py-24 container mx-auto px-4">
+            <h2 class="reveal font-heading text-3xl md:text-4xl text-center mb-16">
+                HIERARCHY OF <span class="text-primary neon-text">POWER</span>
+            </h2>
+            
+            <div class="max-w-lg mx-auto relative pl-8 md:pl-12">
+                <!-- Timeline Vertical Laser -->
+                <div class="absolute left-2 md:left-4 top-0 h-full w-1 bg-gradient-to-b from-transparent via-primary to-transparent shadow-[0_0_10px_#00ffcc]"></div>
+
+                <!-- LEVEL 01 -->
+                <div class="reveal relative mb-8 group">
+                    <!-- Dot -->
+                    <div class="absolute -left-[28px] md:-left-[34px] top-1/2 transform -translate-y-1/2 w-4 h-4 bg-black border-2 border-gray-600 rounded-full z-10 group-hover:border-primary group-hover:shadow-[0_0_10px_#00ffcc] transition-all duration-300"></div>
+                    <!-- Card -->
+                    <div class="holo-card p-4 rounded-lg flex justify-between items-center border-gray-700 opacity-60 hover:opacity-100 transition-all duration-300">
+                        <div class="font-mono text-white">
+                            <span class="text-xs text-gray-500 block">LVL 01</span>
+                            NOOB
+                        </div>
+                        <div class="text-xs font-mono text-gray-500">00% EXP</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 10 -->
+                <div class="reveal relative mb-8 group">
+                    <div class="absolute -left-[28px] md:-left-[34px] top-1/2 transform -translate-y-1/2 w-4 h-4 bg-black border-2 border-gray-500 rounded-full z-10 group-hover:border-primary group-hover:shadow-[0_0_10px_#00ffcc] transition-all duration-300"></div>
+                    <div class="holo-card p-4 rounded-lg flex justify-between items-center border-gray-600 opacity-70 hover:opacity-100 transition-all duration-300">
+                        <div class="font-mono text-white">
+                            <span class="text-xs text-gray-500 block">LVL 10</span>
+                            BEGINNER
+                        </div>
+                        <div class="text-xs font-mono text-gray-500">10% EXP</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 40 -->
+                <div class="reveal relative mb-8 group">
+                    <div class="absolute -left-[28px] md:-left-[34px] top-1/2 transform -translate-y-1/2 w-4 h-4 bg-black border-2 border-primary/50 rounded-full z-10 group-hover:border-primary group-hover:shadow-[0_0_10px_#00ffcc] transition-all duration-300"></div>
+                    <div class="holo-card p-4 rounded-lg flex justify-between items-center border-primary/30 hover:border-primary/60 transition-all duration-300">
+                        <div class="font-mono text-white">
+                            <span class="text-xs text-primary/70 block">LVL 40</span>
+                            INTERMEDIATE
+                        </div>
+                        <div class="text-xs font-mono text-primary">40% EXP</div>
+                    </div>
+                </div>
+
+                <!-- MAX CAP -->
+                <div class="reveal relative mb-8 group">
+                    <div class="absolute -left-[28px] md:-left-[34px] top-1/2 transform -translate-y-1/2 w-4 h-4 bg-primary border-2 border-white rounded-full z-10 shadow-[0_0_15px_#00ffcc]"></div>
+                    <div class="holo-card p-4 rounded-lg flex justify-between items-center border-primary bg-primary/10 shadow-[0_0_20px_rgba(0,255,204,0.1)]">
+                        <div class="font-mono text-white">
+                            <span class="text-xs text-primary block">MAX_CAP</span>
+                            SIGMA
+                        </div>
+                        <div class="text-xs font-mono font-bold text-white bg-primary/20 px-2 py-1 rounded">100% EXP</div>
+                    </div>
+                </div>
+
+                <!-- LEVEL 999 (LOCKED) -->
+                <div class="reveal relative mb-8 group">
+                    <!-- Glowing Gold Dot -->
+                    <div class="absolute -left-[28px] md:-left-[34px] top-1/2 transform -translate-y-1/2 w-4 h-4 bg-gold border-2 border-white rounded-full z-10 shadow-[0_0_20px_#ffd700] animate-pulse"></div>
+                    
+                    <!-- Locked Card -->
+                    <div class="relative overflow-hidden rounded-lg border-2 border-gold bg-black/80 p-5 shadow-[0_0_30px_rgba(255,215,0,0.2)]">
+                        <!-- Diagonal Stripes Background -->
+                        <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, #ffd700 0, #ffd700 10px, transparent 10px, transparent 20px);"></div>
+                        
+                        <div class="relative z-10 flex justify-between items-center">
+                            <div>
+                                <h3 class="text-gold font-heading text-2xl glitch-text" data-text="LEVEL 999">LEVEL 999</h3>
+                                <span class="text-white font-bold tracking-widest text-sm">RANK: TUFF</span>
+                            </div>
+                            <div class="text-2xl">🔒</div>
+                        </div>
+                        <div class="mt-3 bg-red-900/30 border border-red-500/50 text-red-400 text-[10px] md:text-xs font-mono p-2 rounded text-center">
+                            ACCESS DENIED [AUTH_LEVEL_LOW]
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Log Message -->
+            <div class="reveal max-w-xl mx-auto mt-12 p-4 border border-dashed border-gold/50 text-gold/80 text-center rounded-lg bg-gray-900/50 font-mono text-[10px] md:text-xs">
+                SYSTEM_LOG: To reach TUFF status, current personnel must initiate Legacy Transfer Protocol (LTP) to approved successors.
+            </div>
+        </section>
+
+        <!-- TUFF TOKEN -->
+        <section id="token" class="py-20 bg-gradient-to-b from-transparent to-primary/5 border-t border-primary/20">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="reveal font-heading text-3xl md:text-4xl mb-12">
+                    CRYPTO ASSET: <span class="text-gold glitch-text" data-text="$TUFF_ID">$TUFF_ID</span>
+                </h2>
+                
+                <div class="flex flex-col md:flex-row justify-center items-center gap-10 md:gap-12">
+                    <!-- Floating Coin -->
+                    <div class="reveal relative w-40 h-40 md:w-64 md:h-64">
+                        <div class="absolute inset-0 rounded-full border-4 border-gold/30 animate-[spin_4s_linear_infinite]"></div>
+                        <div class="absolute inset-4 rounded-full border-2 border-dashed border-gold/60 animate-[spin_10s_linear_infinite_reverse]"></div>
+                        <img src="coin1.jpg" class="rounded-full w-full h-full object-cover shadow-[0_0_50px_rgba(255,215,0,0.3)] z-10 relative" alt="Coin">
+                    </div>
+
+                    <!-- Terminal Stats -->
+                    <div class="reveal text-left font-mono bg-black/80 p-6 border border-primary rounded w-full max-w-sm relative overflow-hidden">
+                        <!-- Scan line in terminal -->
+                        <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent via-primary/5 to-transparent animate-[scan_3s_linear_infinite] pointer-events-none"></div>
+                        
+                        <p class="text-primary mb-4 text-xs md:text-sm">> RUNNING VALUATION_ALGO.EXE...</p>
+                        <div class="grid grid-cols-2 gap-3 text-xs md:text-sm">
+                            <div class="text-gray-500">ASSET CLASS:</div>
+                            <div class="text-right text-white">LEGENDARY</div>
+                            
+                            <div class="text-gray-500">MARKET CAP:</div>
+                            <div class="text-right text-gold">INFINITE</div>
+                            
+                            <div class="text-gray-500">BUY PRICE:</div>
+                            <div class="text-right text-green-400">$10.00 USD</div>
+                            
+                            <div class="text-gray-500">STATUS:</div>
+                            <div class="text-right text-primary animate-pulse">MOONING 🚀</div>
+                        </div>
+                        <div class="mt-5 pt-3 border-t border-gray-800 text-[10px] text-gray-600 break-all">
+                            HASH: 0x7UFF_G4NG_F0R3V3R_B0SS_M0D3
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-black py-8 text-center border-t border-gray-900 relative z-10">
+        <p class="text-gray-600 font-mono text-[10px] md:text-xs">
+            &copy; 2025 TUFF GANG INDUSTRIES. <span class="text-primary">ENCRYPTED CONNECTION ESTABLISHED.</span>
+        </p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. MATRIX RAIN EFFECT ---
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const str = "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const matrix = str.split("");
+        const fontSize = 14;
+        let columns = width / fontSize;
+        const drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = "#0F0"; // Green text
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrix[Math.floor(Math.random() * matrix.length)];
+                
+                if(Math.random() > 0.98) {
+                    ctx.fillStyle = "#FFF";
+                } else if (Math.random() > 0.95) {
+                     ctx.fillStyle = "#00ffcc";
+                } else {
+                    ctx.fillStyle = "#0F0";
+                }
+
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            columns = width / fontSize;
+            for (let i = 0; i < columns; i++) drops[i] = 1; 
+        });
+
+        setInterval(drawMatrix, 33);
+
+
+        // --- 2. SCROLL REVEAL ANIMATION ---
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealOnScroll = () => {
+            const windowHeight = window.innerHeight;
+            const elementVisible = 50; // Trigger earlier on mobile
+
+            revealElements.forEach((el) => {
+                const elementTop = el.getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    el.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll();
+
+
+        // --- 3. TYPEWRITER EFFECT ---
+        const textElement = document.getElementById('typewriter');
+        const textToType = "LITERALLY UNFOLDABLE // SYSTEM_SECURE";
+        let charIndex = 0;
+
+        function typeWriter() {
+            if (charIndex < textToType.length) {
+                textElement.innerHTML += textToType.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, 50 + Math.random() * 50);
+            }
+        }
+        
+        setTimeout(typeWriter, 1000);
+
+    </script>
+</body>
+</html>
