@@ -145,9 +145,20 @@
         .holo-card:hover .cyber-img {
             filter: grayscale(0%) contrast(1) brightness(1);
         }
+
+        /* small music control */
+        .music-control {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 99999;
+        }
     </style>
 </head>
 <body class="text-gray-300 font-body antialiased selection:bg-primary selection:text-black">
+
+    <!-- AUDIO: place your music.mp3 next to this HTML file or update src to the correct path -->
+    <audio id="bg-music" src="music.mp3" preload="auto" loop></audio>
 
     <!-- CANVAS FOR MATRIX RAIN -->
     <canvas id="matrix-bg"></canvas>
@@ -187,7 +198,8 @@
                 <span id="typewriter" class="text-primary"></span><span class="animate-pulse">_</span>
             </p>
             
-            <a href="#members" class="mt-8 md:mt-10 group relative inline-flex items-center justify-center px-8 py-3 text-sm md:text-base font-bold text-white transition-all duration-200 bg-transparent border-2 border-primary hover:bg-primary hover:text-black focus:outline-none">
+            <!-- Initiate button now has id so we can use it to allow user gesture to start audio (autoplay often blocked) -->
+            <a href="#members" id="initiate-btn" class="mt-8 md:mt-10 group relative inline-flex items-center justify-center px-8 py-3 text-sm md:text-base font-bold text-white transition-all duration-200 bg-transparent border-2 border-primary hover:bg-primary hover:text-black focus:outline-none">
                 <span class="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-gray-900"></span>
                 <span class="relative">INITIATE SEQUENCE</span>
             </a>
@@ -475,15 +487,68 @@
 
     </main>
 
-    <!-- FOOTER -->
+    <!-- Footer -->
     <footer class="bg-black py-8 text-center border-t border-gray-900 relative z-10">
         <p class="text-gray-600 font-mono text-[10px] md:text-xs">
             &copy; 2025 TUFF GANG INDUSTRIES. <span class="text-primary">ENCRYPTED CONNECTION ESTABLISHED.</span>
         </p>
     </footer>
 
+    <!-- MUSIC CONTROL BUTTON -->
+    <div class="music-control">
+        <button id="music-toggle" class="bg-black/70 border border-primary text-primary p-3 rounded-full shadow-lg hover:bg-primary hover:text-black transition" title="Play / Pause">
+            ▶
+        </button>
+    </div>
+
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        // --- AUDIO SETUP ---
+        const audio = document.getElementById('bg-music');
+        const musicToggle = document.getElementById('music-toggle');
+        const initiateBtn = document.getElementById('initiate-btn');
+
+        // Small helper to update the toggle icon
+        function updateToggleButton() {
+            if (audio.paused) {
+                musicToggle.textContent = '▶';
+            } else {
+                musicToggle.textContent = '⏸';
+            }
+        }
+
+        // Try to play on user gesture (most browsers block autoplay without user interaction)
+        initiateBtn.addEventListener('click', (e) => {
+            // allow default navigation to anchor after playing
+            audio.play().catch((err) => {
+                // could not autoplay; user gesture might be prevented by the browser
+                // we silently ignore - user can use the toggle button
+                console.warn('Autoplay prevented:', err);
+            }).finally(() => {
+                // update UI
+                updateToggleButton();
+                // let the link navigate normally (it points to #members)
+            });
+        });
+
+        // Toggle play/pause button
+        musicToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (audio.paused) {
+                audio.play().then(updateToggleButton).catch((err) => {
+                    // if browser still prevents play, show a console message
+                    console.warn('Playback failed:', err);
+                });
+            } else {
+                audio.pause();
+                updateToggleButton();
+            }
+        });
+
+        // Update button state when audio ends/plays
+        audio.addEventListener('play', updateToggleButton);
+        audio.addEventListener('pause', updateToggleButton);
+
         // --- 1. MATRIX RAIN EFFECT ---
         const canvas = document.getElementById('matrix-bg');
         const ctx = canvas.getContext('2d');
